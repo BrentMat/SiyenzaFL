@@ -210,7 +210,7 @@ df_final<-left_join(original_indicators,care_date)%>%
   
 ##############  WRITE FINAL DATASET TO OUTPUTS FOLDER #################
 
-write.table(df_final, paste0("Outputs/interagencyDash_", Sys.Date(), ".txt"), sep = "\t", row.names = FALSE)
+write.table(df_final, paste0("Outputs/interagencyDash_", Sys.Date(), ".txt"), sep = "\t", row.names = FALSE, na="")
 
 
 #Remove the objects in your environment
