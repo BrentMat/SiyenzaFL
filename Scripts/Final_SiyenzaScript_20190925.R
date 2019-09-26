@@ -16,16 +16,16 @@ library(splitstackshape)
 tx_curr_startOfSiyenza  <-  as.POSIXct("2019-03-01")
 startOfSiyenza          <-  as.POSIXct("2019-03-15")
 endOfSiyenza            <-  as.POSIXct("2019-10-04") # Change the date here to 2020 date
-currentWeekStart        <-  as.POSIXct("2019-09-07") # Change date here WEEKLY
-currentWeekEnd          <-  as.POSIXct("2019-09-13") # Change date here WEEKLY
+currentWeekStart        <-  as.POSIXct("2019-09-14") # Change date here WEEKLY
+currentWeekEnd          <-  as.POSIXct("2019-09-20") # Change date here WEEKLY
 
 
 ##### Import CDC datasets #####
-cdc_result <- read_excel("RAW/CDC_Siyenza_20190917.xlsx", sheet = "Siyenza")%>%
+cdc_result <- read_excel("RAW/CDC_Siyenza_20190925.xlsx", sheet = "Siyenza")%>%
    filter(Week_End >= date(tx_curr_startOfSiyenza))
 
 ##### Import USAID datasets and filter out dummy rows for Western Cape Province Sites #####
-usaid_result <- read_excel("RAW/USAID_Siyenza_20190917.xlsx", sheet = "USAID RAW DATA") %>% 
+usaid_result <- read_excel("RAW/USAID_Siyenza_20190926.xlsx", sheet = "USAID RAW DATA") %>% 
   filter(Week_End >= date(tx_curr_startOfSiyenza)) %>% 
   filter(!Siyenza_StartDate==date("2019-08-01") | !Week_End<date("2019-08-02"))
 
@@ -35,13 +35,7 @@ df_merged <- bind_rows(cdc_result, usaid_result) %>%
   select(-CURR_RTC) %>%
   filter(!Week_End<date("2019-06-07") | !PrimePartner=="Anova Health Institute" | !SNU1=="wc Western Cape Province") %>% 
   filter(!Week_End>date("2019-05-31") | !PrimePartner=="Kheth'Impilo" | !SNU1=="wc Western Cape Province") %>% 
-  arrange(Facility, Week_End)
-
-
-
-##### Remove values for rows with data before agreed upon reporting weeks #######
-interim<-df_merged %>%
-                  gather(indicator, value, HTS_TST_POS:TARG_WKLY_NETNEW)%>%
+  gather(indicator, value, HTS_TST_POS:TARG_WKLY_NETNEW)%>%
   mutate(value = case_when(
     Week_End == date(startOfSiyenza) & indicator %in% c("TX_CURR_28")  ~ 0,
     Week_End <= date(startOfSiyenza) & indicator %ni% c("TX_CURR_28")  ~ 0, 
@@ -49,7 +43,13 @@ interim<-df_merged %>%
       date(Siyenza_StartDate) == date("2019-08-01") ~ 0,
     indicator %ni% c("TX_CURR_28")& Week_End <= date("2019-08-10") & 
       date(Siyenza_StartDate) == date("2019-08-01") ~ 0,
-    TRUE ~ value)) %>% 
+    TRUE ~ value)) %>%
+  arrange(Facility, Week_End)
+
+
+
+##### Remove values for rows with data before agreed upon reporting weeks #######
+interim<-df_merged %>%
   filter(indicator %in% c("TX_CURR_28","EARLYMISSED", "LATEMISSED", "uLTFU", "TX_NEW")) %>% 
   arrange(Facility, Week_End)
 
@@ -61,7 +61,6 @@ calc_indicators<-interim %>%
 
 #### Filter merged dataset for indicators that are NOT modified ####
 original_indicators<-df_merged %>%
-  gather(indicator, value, HTS_TST_POS:TARG_WKLY_NETNEW)%>%
   filter(indicator %ni% c("TX_CURR_28","EARLYMISSED", "LATEMISSED", "uLTFU", "TX_NEW")) %>% 
   spread(indicator, value) %>% 
   arrange(Facility, Week_End)
@@ -207,7 +206,7 @@ df_final<-left_join(original_indicators,care_date)%>%
   left_join(latemissed)%>%
   left_join(ultfumissed)%>%
   filter(Week_End >= date(tx_curr_startOfSiyenza) & Week_End<= date(currentWeekEnd))
-  
+
   
 ##############  WRITE FINAL DATASET TO OUTPUTS FOLDER #################
 
@@ -215,4 +214,4 @@ write.table(df_final, paste0("Outputs/interagencyDash_", Sys.Date(), ".txt"), se
 
 
 #Remove the objects in your environment
- rm(list=ls())
+rm(list=ls())
