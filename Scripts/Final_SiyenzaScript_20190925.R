@@ -205,7 +205,8 @@ df_final<-left_join(original_indicators,care_date)%>%
   left_join(df_tx_net_new)%>%
   left_join(earlymissed)%>%
   left_join(latemissed)%>%
-  left_join(ultfumissed)
+  left_join(ultfumissed)%>%
+  filter(Week_End >= date(tx_curr_startOfSiyenza) & Week_End<= date(currentWeekEnd))
   
   
 ##############  WRITE FINAL DATASET TO OUTPUTS FOLDER #################
