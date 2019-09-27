@@ -21,11 +21,11 @@ currentWeekEnd          <-  as.POSIXct("2019-09-20") # Change date here WEEKLY
 
 
 ##### Import CDC datasets #####
-cdc_result <- read_excel("RAW/CDC_Siyenza_20190925.xlsx", sheet = "Siyenza")%>%
+cdc_result <- read_excel("RAW/CDC_Siyenza_20190925.xlsx", sheet = "CDC_RAW_DATA")%>%
    filter(Week_End >= date(tx_curr_startOfSiyenza))
 
 ##### Import USAID datasets and filter out dummy rows for Western Cape Province Sites #####
-usaid_result <- read_excel("RAW/USAID_Siyenza_20190926.xlsx", sheet = "USAID RAW DATA") %>% 
+usaid_result <- read_excel("RAW/USAID_Siyenza_20190926.xlsx", sheet = "USAID_RAW_DATA") %>% 
   filter(Week_End >= date(tx_curr_startOfSiyenza)) %>% 
   filter(!Siyenza_StartDate==date("2019-08-01") | !Week_End<date("2019-08-02"))
 
