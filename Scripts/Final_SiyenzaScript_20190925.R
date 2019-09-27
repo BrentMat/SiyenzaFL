@@ -50,7 +50,7 @@ df_merged <- bind_rows(cdc_result, usaid_result) %>%
 
 ##### Remove values for rows with data before agreed upon reporting weeks #######
 interim<-df_merged %>%
-  filter(indicator %in% c("TX_CURR_28","EARLYMISSED", "LATEMISSED", "uLTFU", "TX_NEW")) %>% 
+  filter(indicator %in% c("TX_CURR_28","EARLYMISSED", "LATEMISSED", "uLTFU", "TX_NEW","TARG_WKLY_NETNEW")) %>% 
   arrange(Facility, Week_End)
 
 ###### Drop irrelevant columns to account for transitional complexities.############# 
@@ -61,7 +61,7 @@ calc_indicators<-interim %>%
 
 #### Filter merged dataset for indicators that are NOT modified ####
 original_indicators<-df_merged %>%
-  filter(indicator %ni% c("TX_CURR_28","EARLYMISSED", "LATEMISSED", "uLTFU", "TX_NEW")) %>% 
+  filter(indicator %ni% c("TX_CURR_28","EARLYMISSED", "LATEMISSED", "uLTFU", "TX_NEW", "TARG_WLKY_NETNEW")) %>% 
   spread(indicator, value) %>% 
   arrange(Facility, Week_End)
 
@@ -85,7 +85,7 @@ df_tx_net_new<-calc_indicators %>%
 
 ######## Create Curr Reporting dates and Bi-Weekly Grouping for ease of visualizing ########
 care_date<-calc_indicators %>% 
-          filter(indicator %in% c("TX_CURR_28", "TX_NEW"))%>%
+          filter(indicator %in% c("TARG_WKLY_NETNEW","TX_CURR_28", "TX_NEW"))%>%
           spread(indicator, value)%>%
           mutate(TX_CURR_28=case_when(Week_End==date("2019-04-05") | Week_End==date("2019-05-03")~0, TRUE~TX_CURR_28)) %>%
           mutate(curr_reporting_date=case_when(TX_CURR_28>0~ Week_End)) %>%
